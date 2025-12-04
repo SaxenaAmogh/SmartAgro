@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.smartagro.ui.screens.HomePage
 import com.example.smartagro.ui.screens.LoginPage
 
 @Composable
@@ -18,6 +19,9 @@ fun AppNavigation(navController: NavHostController) {
         }
         composable("login") {
             LoginPage(navController)
+        }
+        composable("home") {
+            HomePage(navController)
         }
     }
 }
