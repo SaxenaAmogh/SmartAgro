@@ -515,7 +515,7 @@ fun HomePage(navController: NavController){
                         Spacer(modifier = Modifier.size(8.dp))
                         IconButton(
                             onClick = {
-                                navController.navigate("member")
+                                navController.navigate("weather")
                             },
                             modifier = Modifier
                                 .clip(RoundedCornerShape(50))
