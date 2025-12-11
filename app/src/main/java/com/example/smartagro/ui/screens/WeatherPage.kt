@@ -100,7 +100,6 @@ fun WeatherPage(navController: NavController) {
         windowInsetsController.isAppearanceLightStatusBars = true
     }
 
-
     val KisanViewModel: KisanViewModel = viewModel()
     val data by KisanViewModel.kisanData.collectAsState()
 
