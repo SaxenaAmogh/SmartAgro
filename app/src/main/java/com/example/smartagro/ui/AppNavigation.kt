@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.smartagro.ui.screens.CropPage
 import com.example.smartagro.ui.screens.HomePage
 import com.example.smartagro.ui.screens.LoginPage
 import com.example.smartagro.ui.screens.WeatherPage
@@ -16,7 +17,7 @@ fun AppNavigation(navController: NavHostController) {
 
     NavHost(
         navController = navController,
-        startDestination = "weather"
+        startDestination = "home"
     ) {
         composable("splash") {
             //SplashScreen(navController)
@@ -29,6 +30,9 @@ fun AppNavigation(navController: NavHostController) {
         }
         composable("weather") {
             WeatherPage(navController)
+        }
+        composable("crop") {
+            CropPage(navController)
         }
     }
 }

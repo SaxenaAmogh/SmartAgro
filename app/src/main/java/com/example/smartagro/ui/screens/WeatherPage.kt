@@ -3,6 +3,8 @@ package com.example.smartagro.ui.screens
 import android.annotation.SuppressLint
 import android.app.Activity
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,6 +28,11 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.DateRange
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -35,6 +42,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -52,6 +61,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.smartagro.R
@@ -64,6 +74,7 @@ import com.example.smartagro.ui.theme.Primary
 import com.example.smartagro.ui.theme.Secondary
 import com.example.smartagro.ui.theme.SproutGreen
 import com.example.smartagro.ui.theme.latoFontFamily
+import com.example.smartagro.viewmodel.KisanViewModel
 
 data class WeatherItem(
     val label: String,
@@ -89,36 +100,33 @@ fun WeatherPage(navController: NavController) {
         windowInsetsController.isAppearanceLightStatusBars = true
     }
 
+
+    val KisanViewModel: KisanViewModel = viewModel()
+    val data by KisanViewModel.kisanData.collectAsState()
+
+    // 2. Safely access the nested data
+    val humidity = data.WeatherData.Humidity
+    val temperature = data.WeatherData.Temperature
+    val rain = data.WeatherData.RainPercent
+
     val weatherData = listOf(
         WeatherItem(
             label = "HUMIDITY",
-            value = "85%",
+            value = "$humidity%",
             icon = painterResource(R.drawable.waterdrop),
             color = Color(0xFF42A5F5) // Blue
         ),
         WeatherItem(
             label = "RAIN CHANCE",
-            value = "70%",
+            value = "$rain%",
             icon = painterResource(R.drawable.cloudy), // Simulating rain/cloud
             color = Color(0xFF7E57C2) // Purple
-        ),
-        WeatherItem(
-            label = "DEW POINT",
-            value = "18°C",
-            icon = painterResource(R.drawable.dewpoint),
-            color = Color(0xFF26A69A) // Teal
-        ),
-        WeatherItem(
-            label = "WIND",
-            value = "12 km/h",
-            icon = painterResource(R.drawable.haze),
-            color = Color(0xFF78909C) // Grey Blue
         )
     )
     val forecastData = listOf(
-        ForecastItem("Today", "Rainy", painterResource(R.drawable.raining), Color.Gray, 22, 18),
-        ForecastItem("Tomorrow", "Sunny", painterResource(R.drawable.sunny), Color(0xFFFFB74D),22, 18), // Orange
-        ForecastItem("Wed", "Haze", painterResource(R.drawable.haze), Color(0xFFFFB74D), 27, 21)
+        ForecastItem("6:40pm", "Rainy", painterResource(R.drawable.sunny), Color.Unspecified, 10),
+        ForecastItem("7:40pm", "Haze", painterResource(R.drawable.sunny), Color.Unspecified,14),
+        ForecastItem("8:40pm", "Haze", painterResource(R.drawable.cloudy), Color.Unspecified, 57)
     )
 
     Scaffold(
@@ -158,17 +166,49 @@ fun WeatherPage(navController: NavController) {
                                                 )
                                             )
                                             .padding(
-                                                horizontal = 0.06 * screenWidth
+                                                horizontal = 0.05 * screenWidth
                                             )
                                     ) {
                                         Spacer(modifier = Modifier.size(0.02 * screenHeight))
-                                        Text(
-                                            text = "Your Weather",
-                                            color = Color.White,
-                                            fontFamily = latoFontFamily,
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = 30.sp
-                                        )
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth(),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .clickable {
+                                                        navController.popBackStack()
+                                                    }
+                                                    .align(Alignment.CenterVertically)
+                                                    .background(
+                                                        color = Color(0xFFFFFFFF).copy(alpha = 0.12f),
+                                                        shape = RoundedCornerShape(50.dp)
+                                                    )
+                                                    .border(
+                                                        width = 1.dp,
+                                                        color = Color.White.copy(alpha = 0.3f),
+                                                        shape = RoundedCornerShape(50.dp)
+                                                    )
+                                                    .padding(6.dp)
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                                    contentDescription = "settings_icon",
+                                                    tint = Color.White,
+                                                    modifier = Modifier
+                                                        .size(30.dp)
+                                                )
+                                            }
+                                            Spacer(modifier = Modifier.size(0.03 * screenWidth))
+                                            Text(
+                                                text = "Your Weather",
+                                                color = Color.White,
+                                                fontFamily = latoFontFamily,
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 30.sp
+                                            )
+                                        }
                                         Spacer(modifier = Modifier.size(0.03 * screenHeight))
                                         Column(
                                             modifier = Modifier
@@ -185,7 +225,7 @@ fun WeatherPage(navController: NavController) {
                                             )
                                             Spacer(modifier = Modifier.size(0.01 * screenHeight))
                                             Text(
-                                                text = "22°C",
+                                                text = "${temperature}°C",
                                                 color = Color.White,
                                                 fontSize = 80.sp,
                                                 fontFamily = latoFontFamily,
@@ -197,7 +237,7 @@ fun WeatherPage(navController: NavController) {
                                                 verticalAlignment = Alignment.CenterVertically
                                             ){
                                                 Icon(
-                                                    painter = painterResource(R.drawable.raining),
+                                                    painter = painterResource(R.drawable.sunny),
                                                     contentDescription = "weather_icon",
                                                     tint = Color.Unspecified,
                                                     modifier = Modifier
@@ -205,7 +245,7 @@ fun WeatherPage(navController: NavController) {
                                                 )
                                                 Spacer(modifier = Modifier.size(0.02 * screenWidth))
                                                 Text(
-                                                    text = "Rain Expected",
+                                                    text = "Rain Not Expected",
                                                     color = Color.White,
                                                     fontSize = 22.sp,
                                                     fontFamily = latoFontFamily,
@@ -269,11 +309,12 @@ fun WeatherPage(navController: NavController) {
                                             imageVector = Icons.Rounded.DateRange,
                                             contentDescription = "Forecast",
                                             tint = Color(0xFF4285F4), // Google Blue-ish
-                                            modifier = Modifier.size(20.dp)
+                                            modifier = Modifier.size(30.dp)
                                         )
                                         Spacer(modifier = Modifier.width(8.dp))
                                         Text(
                                             text = "Forecast",
+                                            fontSize = 24.sp,
                                             style = MaterialTheme.typography.titleMedium,
                                             fontWeight = FontWeight.Bold,
                                             color = Color(0xFF2d3436)
@@ -291,92 +332,6 @@ fun WeatherPage(navController: NavController) {
                                     }
                                 }
                             }
-                            Spacer(modifier = Modifier.size(0.1 * screenHeight))
-                        }
-                    }
-
-                    // Bottom Navigation Bar
-                    Row(
-                        modifier = Modifier
-                            .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Bottom))
-                            .align(Alignment.BottomCenter)
-                            .fillMaxWidth()
-                            .height(0.07 * screenHeight)
-                            .padding(
-                                horizontal = 0.065 * screenWidth
-                            )
-                            .background(
-                                shape = RoundedCornerShape(40.dp),
-                                color = SproutGreen
-                            ),
-                        horizontalArrangement = Arrangement.SpaceEvenly,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        IconButton(
-                            onClick = {
-                                navController.navigate("home")
-                            },
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(25.dp))
-                                .size(45.dp)
-                        ) {
-                            Icon(
-                                painter = painterResource(R.drawable.home),
-                                contentDescription = "home",
-                                Modifier.size(24.dp),
-                                tint = Accent
-                            )
-                        }
-                        Spacer(modifier = Modifier.size(8.dp))
-                        IconButton(
-                            onClick = {
-                            },
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(50))
-                                .size(45.dp)
-                                .background(
-                                    color = Primary,
-                                    shape = RoundedCornerShape(50)
-                                )
-                        ) {
-                            Icon(
-                                painter = painterResource(R.drawable.weather),
-                                contentDescription = "cart_na",
-                                Modifier.size(32.dp),
-                                tint = Color.Black
-                            )
-                        }
-                        Spacer(modifier = Modifier.size(8.dp))
-                        IconButton(
-                            onClick = {
-                                navController.navigate("security")
-                            },
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(50))
-                                .size(45.dp)
-                        ) {
-                            Icon(
-                                painter = painterResource(R.drawable.harvest_na),
-                                contentDescription = "explore",
-                                Modifier.size(32.dp),
-                                tint = Accent
-                            )
-                        }
-                        Spacer(modifier = Modifier.size(8.dp))
-                        IconButton(
-                            onClick = {
-                                navController.navigate("projects")
-                            },
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(50))
-                                .size(45.dp)
-                        ) {
-                            Icon(
-                                painter = painterResource(R.drawable.wateringcan_na),
-                                contentDescription = "cart_na",
-                                Modifier.size(32.dp),
-                                tint = Accent
-                            )
                         }
                     }
                 }

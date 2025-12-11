@@ -1,6 +1,7 @@
 package com.example.smartagro.ui.components
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.DateRange
@@ -14,6 +15,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.smartagro.R
 
 data class ForecastItem(
@@ -21,17 +23,16 @@ data class ForecastItem(
     val weatherCondition: String,
     val icon: Painter,
     val iconColor: Color,
-    val highTemp: Int,
-    val lowTemp: Int
+    val rainPercent: Int,
 )
 
 @Composable
 fun ForecastCard() {
     // 2. Mock Data based on your image
     val forecastData = listOf(
-        ForecastItem("Today", "Rainy", painterResource(R.drawable.raining), Color.Gray, 22, 18),
-        ForecastItem("Tomorrow", "Sunny", painterResource(R.drawable.sunny), Color(0xFFFFB74D),22, 18), // Orange
-        ForecastItem("Wed", "Haze", painterResource(R.drawable.haze), Color(0xFFFFB74D), 27, 21)
+        ForecastItem("Today", "Rainy", painterResource(R.drawable.raining), Color.Gray, 22),
+        ForecastItem("Tomorrow", "Sunny", painterResource(R.drawable.sunny), Color(0xFFFFB74D),22), // Orange
+        ForecastItem("Wed", "Haze", painterResource(R.drawable.haze), Color(0xFFFFB74D), 27)
     )
 
     // 3. Main Card
@@ -87,46 +88,36 @@ fun ForecastCard() {
 fun ForecastRow(item: ForecastItem) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceAround
     ) {
-        // 1. Day (Left aligned)
-        // Weight 1f ensures it takes up consistent space
         Text(
             text = item.day,
             style = MaterialTheme.typography.bodyLarge,
             fontWeight = FontWeight.SemiBold,
-            color = Color(0xFF455A64), // Dark Grey
-            modifier = Modifier.weight(1f)
+            fontSize = 24.sp,
+            color = Color(0xFF455A64),
         )
-        Spacer(modifier = Modifier.width(55.dp))
-        // 2. Condition (Center aligned mostly)
-        // We use a Row here to group the icon and text tightly
+        Spacer(modifier = Modifier.width(8.dp))
         Row(
-            modifier = Modifier.weight(1.5f), // Slightly more weight for the middle section
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(2.dp)
         ) {
             Icon(
                 item.icon,
                 contentDescription = item.weatherCondition,
                 tint = item.iconColor,
-                modifier = Modifier.size(20.dp)
+                modifier = Modifier.size(40.dp)
             )
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(12.dp))
             Text(
-                text = item.weatherCondition,
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color.Gray
+                text = "${item.rainPercent}%",
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black,
+                textAlign = androidx.compose.ui.text.style.TextAlign.End
             )
         }
 
-        // 3. Temp (Right aligned)
-        Text(
-            text = "${item.highTemp}° / ${item.lowTemp}°",
-            style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.Bold,
-            color = Color.Black,
-            modifier = Modifier.weight(1f),
-            textAlign = androidx.compose.ui.text.style.TextAlign.End
-        )
     }
 }

@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
@@ -30,9 +31,11 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.R
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -79,8 +82,8 @@ fun LastIrrigatedBadge(
 
         // Canvas fills the box
         Canvas(modifier = Modifier.size(minDimension)) {
-            val center = Offset(size.width / 2, size.height / 2)
-            val mainRadius = (size.width / 2) * 0.8f // Leave 20% room for the pulse
+            val center = Offset(size.width / 2f, size.height / 2f)
+            val mainRadius = (size.width / 2) * 0.85f // Leave 20% room for the pulse
 
             // 1. Pulse
             drawCircle(
@@ -108,19 +111,10 @@ fun LastIrrigatedBadge(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // Dynamic text sizing based on container width could go here,
-            // but standard sizes usually work fine if the container is >120dp
-            Text(
-                text = dateStr,
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF1F2937)
-            )
-
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Outlined.DateRange, null, tint = Color.Gray, modifier = Modifier.size(18.dp))
-                Spacer(Modifier.width(2.dp))
-                Text(timeStr, fontSize = 16.sp, color = Color.Gray)
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Icon(painterResource(com.example.smartagro.R.drawable.clock), null, tint = Color.Gray, modifier = Modifier.size(34.dp))
+                Spacer(Modifier.height(2.dp))
+                Text(timeStr, fontSize = 28.sp, color = Color.Gray)
             }
         }
     }
@@ -130,16 +124,21 @@ fun LastIrrigatedBadge(
 // --- Helper function for java.time formatting (requires API 26+) ---
 @RequiresApi(Build.VERSION_CODES.O)
 private fun formatTimestamp(instant: Instant): Pair<String, String> {
-    val zoneId = ZoneId.systemDefault()
-    val zonedDateTime = instant.atZone(zoneId)
+    val istZoneId = ZoneId.of("Asia/Kolkata") // "Asia/Kolkata" is the canonical ID for IST
+
+    // 2. Convert the Instant to ZonedDateTime in IST
+    val zonedDateTime = instant.atZone(istZoneId)
 
     // Example format: "Oct 24"
     val dateFormatter = DateTimeFormatter.ofPattern("MMM dd", Locale.US)
+
     // Example format: "2:30 PM"
+    // Note: Using Locale.US ensures the 'a' (AM/PM) marker is consistent and in English.
     val timeFormatter = DateTimeFormatter.ofPattern("h:mm a", Locale.US)
 
     return Pair(
         dateFormatter.format(zonedDateTime),
-        timeFormatter.format(zonedDateTime).lowercase()
+        // Convert the time string to lowercase as requested
+        timeFormatter.format(zonedDateTime).lowercase(Locale.US)
     )
 }

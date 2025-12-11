@@ -43,7 +43,7 @@ fun WeatherCard(item: WeatherItem) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .aspectRatio(1.2f) // Makes the card slightly rectangular/squarish
+//            .aspectRatio(f) // Makes the card slightly rectangular/squarish
             .shadow(
                 elevation = 8.dp,
                 shape = RoundedCornerShape(24.dp),
@@ -62,7 +62,7 @@ fun WeatherCard(item: WeatherItem) {
             // Icon with colored circle background
             Box(
                 modifier = Modifier
-                    .size(56.dp)
+                    .size(74.dp)
                     .clip(CircleShape)
                     .background(item.color.copy(alpha = 0.1f)), // Subtle background tint
                 contentAlignment = Alignment.Center
@@ -71,7 +71,7 @@ fun WeatherCard(item: WeatherItem) {
                     item.icon,
                     contentDescription = item.label,
                     tint = item.color,
-                    modifier = Modifier.size(28.dp)
+                    modifier = Modifier.size(56.dp)
                 )
             }
 
@@ -82,6 +82,7 @@ fun WeatherCard(item: WeatherItem) {
                 text = item.label,
                 style = MaterialTheme.typography.labelMedium,
                 color = Color.Gray,
+                fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
             )
 
@@ -92,7 +93,8 @@ fun WeatherCard(item: WeatherItem) {
                 text = item.value,
                 style = MaterialTheme.typography.headlineMedium,
                 color = Color(0xFF2d3436), // Dark charcoal for readability
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                fontSize = 50.sp,
             )
         }
     }

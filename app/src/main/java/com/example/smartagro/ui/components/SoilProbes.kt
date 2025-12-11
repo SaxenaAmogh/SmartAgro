@@ -37,9 +37,9 @@ fun ProbeCapsule(
 ) {
     // Determine color based on Temp (Simple Logic)
     val tempColor = when {
-        data.temp < 20 -> Color(0xFF3B82F6) // Blue (Cold)
-        data.temp > 30 -> Color(0xFFEF4444) // Red (Hot)
-        else -> Color(0xFF10B981) // Green (Optimal)
+        data.moisture < 0.3f -> Color(0xFFEF4444)
+        data.moisture > 0.6f -> Color(0xFF10B981)
+        else -> Color(0xFFFFC107)
     }
 
     // Animation for the liquid level

@@ -4,8 +4,10 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,17 +30,15 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.smartagro.R
@@ -59,10 +60,28 @@ import com.example.smartagro.ui.theme.Accent
 import com.example.smartagro.ui.theme.Background
 import com.example.smartagro.ui.theme.Primary
 import com.example.smartagro.ui.theme.Secondary
-import com.example.smartagro.ui.theme.SproutGreen
 import com.example.smartagro.ui.theme.latoFontFamily
+import com.example.smartagro.viewmodel.KisanViewModel
 import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
+import java.util.Locale
+
+data class WeatherData(
+    val humidity: Int = 0,
+    val temperature: Int = 0,
+)
+
+@RequiresApi(Build.VERSION_CODES.O)
+private fun formatDateOnly(instant: Instant): String {
+    val istZoneId = ZoneId.of("Asia/Kolkata")
+    val zonedDateTime = instant.atZone(istZoneId)
+
+    val dateFormatter = DateTimeFormatter.ofPattern("MMM dd", Locale.US)
+
+    return dateFormatter.format(zonedDateTime)
+}
 
 @RequiresApi(Build.VERSION_CODES.O)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -71,9 +90,7 @@ fun HomePage(navController: NavController){
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
     val screenHeight = configuration.screenHeightDp.dp
-    val context = LocalContext.current
 
-    val focusManager = LocalFocusManager.current
     val view = LocalView.current
     val window = (view.context as? Activity)?.window
     val windowInsetsController = window?.let { WindowCompat.getInsetsController(it, view) }
@@ -82,12 +99,26 @@ fun HomePage(navController: NavController){
         windowInsetsController.isAppearanceLightStatusBars = true
     }
 
-    val sampleIrrigationTime = Instant.now().minus(2, ChronoUnit.HOURS)
+    val sampleIrrigationTime = Instant.now().minus(0, ChronoUnit.HOURS)
+    val date = formatDateOnly(sampleIrrigationTime)
+
+    val KisanViewModel: KisanViewModel = viewModel()
+    val data by KisanViewModel.kisanData.collectAsState()
+
+    val humidity = data.WeatherData.Humidity
+    val temperature = data.WeatherData.Temperature
+
+    val soiltemp = data.FarmData.SoilTemperature
+    val soilmoisture = data.FarmData.SoilMoisture
+    val nodeTemp = data.FarmData.Temperature
+    val nodeHumidity = data.FarmData.Humidity
+    val stage = data.FarmData.Stage
+    val moisturePercentage: Float = soilmoisture * 0.01f
     val probes: List<ProbeData> = listOf(
-        ProbeData(1, 0.5f, 24),
-        ProbeData(2, 0.60f, 23),
-        ProbeData(3, 0.30f, 26),
-        ProbeData(4, 0.85f, 22)
+        ProbeData(1, moisturePercentage, soiltemp),
+        ProbeData(2, 0.0f, 0),
+        ProbeData(3, 0.0f, 0),
+        ProbeData(4, 0.0f, 0)
     )
 
     Scaffold(
@@ -107,7 +138,7 @@ fun HomePage(navController: NavController){
                             .align(Alignment.TopCenter)
                     ){
                         item{
-                            Box{
+                            Box(){
                                 Column(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -132,11 +163,11 @@ fun HomePage(navController: NavController){
                                             verticalAlignment = Alignment.CenterVertically,
                                             horizontalArrangement = Arrangement.SpaceBetween
                                         ) {
-                                            Column() {
+                                            Column {
                                                 Text(
                                                     text = "Namaste, Niranj",
                                                     color = Color.White,
-                                                    fontSize = 28.sp,
+                                                    fontSize = 32.sp,
                                                     fontFamily = latoFontFamily,
                                                     fontWeight = FontWeight.Bold,
                                                     modifier = Modifier
@@ -144,37 +175,18 @@ fun HomePage(navController: NavController){
                                                 Text(
                                                     text = "Jorethang, Sikkim",
                                                     color = Secondary,
-                                                    fontSize = 18.sp,
+                                                    fontSize = 20.sp,
                                                     fontFamily = latoFontFamily,
                                                     modifier = Modifier
                                                 )
                                             }
-                                            Box(
-                                                modifier = Modifier
-                                                    .align(Alignment.CenterVertically)
-                                                    .background(
-                                                        color = Color(0xFFFFFFFF).copy(alpha = 0.12f),
-                                                        shape = RoundedCornerShape(50.dp)
-                                                    )
-                                                    .border(
-                                                        width = 1.dp,
-                                                        color = Color.White.copy(alpha = 0.3f),
-                                                        shape = RoundedCornerShape(50.dp)
-                                                    )
-                                                    .padding(8.dp)
-                                            ) {
-                                                Icon(
-                                                    imageVector = Icons.Default.Settings,
-                                                    contentDescription = "settings_icon",
-                                                    tint = Color.White,
-                                                    modifier = Modifier
-                                                        .size(36.dp)
-                                                )
-                                            }
                                         }
                                         Spacer(modifier = Modifier.size(0.03 * screenHeight))
-                                        Box(
+                                        Column (
                                             modifier = Modifier
+                                                .clickable {
+                                                    navController.navigate("weather")
+                                                }
                                                 .fillMaxWidth()
                                                 .background(
                                                     color = Color(0x0FFFFFFF).copy(alpha = 0.12f),
@@ -185,19 +197,17 @@ fun HomePage(navController: NavController){
                                                     color = Color.White.copy(alpha = 0.3f),
                                                     shape = RoundedCornerShape(20.dp)
                                                 )
-                                                .padding(0.04 * screenWidth)
+                                                .padding(0.04 * screenWidth),
+                                            horizontalAlignment = Alignment.CenterHorizontally
                                         ) {
                                             Row(
-                                                modifier = Modifier.align(Alignment.CenterStart),
                                                 verticalAlignment = Alignment.CenterVertically
                                             ) {
-                                                Icon(
-                                                    painter = painterResource(R.drawable.raining),
+                                                Image(
+                                                    painter = painterResource(R.drawable.sunny),
                                                     contentDescription = "weather_icon",
-                                                    tint = Color.Unspecified,
                                                     modifier = Modifier
-                                                        .size(40.dp)
-                                                )
+                                                        .size(0.1 * screenHeight)                                                )
                                                 Spacer(modifier = Modifier.size(0.03 * screenWidth))
                                                 Column(
                                                     verticalArrangement = Arrangement.Center
@@ -205,14 +215,14 @@ fun HomePage(navController: NavController){
                                                     Text(
                                                         text = "Weather Station",
                                                         color = Secondary,
-                                                        fontSize = 16.sp,
+                                                        fontSize = 22.sp,
                                                         fontFamily = latoFontFamily,
                                                         modifier = Modifier
                                                     )
                                                     Text(
-                                                        text = "Rain Expected",
+                                                        text = "Clear Skies",
                                                         color = Color.White,
-                                                        fontSize = 22.sp,
+                                                        fontSize = 32.sp,
                                                         fontFamily = latoFontFamily,
                                                         fontWeight = FontWeight.Bold,
                                                         modifier = Modifier
@@ -220,13 +230,12 @@ fun HomePage(navController: NavController){
                                                 }
                                             }
                                             Column(
-                                                horizontalAlignment = Alignment.End,
-                                                modifier = Modifier.align(Alignment.CenterEnd)
+                                                horizontalAlignment = Alignment.CenterHorizontally,
                                             ) {
                                                 Text(
-                                                    text = "22°C",
+                                                    text = "$temperature°C",
                                                     color = Color.White,
-                                                    fontSize = 28.sp,
+                                                    fontSize = 68.sp,
                                                     fontFamily = latoFontFamily,
                                                     fontWeight = FontWeight.Bold,
                                                     modifier = Modifier
@@ -234,7 +243,7 @@ fun HomePage(navController: NavController){
                                                 Text(
                                                     text = "Tap for details",
                                                     color = Secondary,
-                                                    fontSize = 14.sp,
+                                                    fontSize = 20.sp,
                                                     fontFamily = latoFontFamily,
                                                     modifier = Modifier
                                                 )
@@ -249,6 +258,8 @@ fun HomePage(navController: NavController){
                             Spacer(modifier = Modifier.size(0.005 * screenHeight))
                             Box(
                                 modifier = Modifier
+                                    .clickable {
+                                    }
                                     .fillMaxWidth()
                                     .padding(
                                         horizontal = 0.04 * screenWidth,
@@ -277,7 +288,7 @@ fun HomePage(navController: NavController){
                                         Text(
                                             text = "Irrigation Status",
                                             color = Color.Black,
-                                            fontSize = 20.sp,
+                                            fontSize = 26.sp,
                                             fontFamily = latoFontFamily,
                                             fontWeight = FontWeight.Bold,
                                             modifier = Modifier
@@ -285,41 +296,85 @@ fun HomePage(navController: NavController){
                                         Text(
                                             text = "System Idle",
                                             color = Accent,
-                                            fontSize = 16.sp,
+                                            fontSize = 18.sp,
                                             fontFamily = latoFontFamily,
                                             modifier = Modifier
                                         )
                                     }
                                     Spacer(modifier = Modifier.size(0.015 * screenHeight))
                                     Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                        verticalAlignment = Alignment.CenterVertically
+                                        modifier = Modifier
+                                            .fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceEvenly,
+                                        verticalAlignment = Alignment.CenterVertically,
                                     ){
                                         // --- COLUMN 1: WATER TANK ---
                                         Column(
                                             horizontalAlignment = Alignment.CenterHorizontally,
                                             modifier = Modifier
-                                                .weight(1f)
-                                                .height(170.dp)
-                                                .background(Accent.copy(alpha = 0.2f), RoundedCornerShape(20.dp))
-                                                .padding(vertical = 16.dp) // Only vertical padding, let width fill
                                         ) {
                                             WaterTank(
-                                                percentage = 0.69f,
-                                                modifier = Modifier.width(120.dp).height(150.dp)
+                                                percentage = 0.55f,
+                                                modifier = Modifier.width(165.dp).height(180.dp)
                                             )
                                         }
-
-                                        // --- COLUMN 2: LAST IRRIGATED ---
+                                        Spacer(modifier = Modifier.width(0.01 * screenWidth))
                                         Column(
                                             horizontalAlignment = Alignment.CenterHorizontally,
-                                            verticalArrangement = Arrangement.Center,
                                             modifier = Modifier
-                                                .weight(1f)
-                                                .height(170.dp)
-                                                .background(Color(0xFF57C9A3).copy(alpha = 0.4f), RoundedCornerShape(20.dp))
-                                                .padding(6.dp)
+                                        ){
+                                            Text(
+                                                text = "Water Level",
+                                                fontSize = 28.sp,
+                                                fontFamily = latoFontFamily,
+                                                color = Color.Black,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                            Text(
+                                                text = "55%",
+                                                fontSize = 62.sp,
+                                                fontFamily = latoFontFamily,
+                                                color = Accent,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                            Text(
+                                                text = "Community Tank",
+                                                color = Color(0xFFA1A7B0),
+                                                fontSize = 20.sp,
+                                                fontFamily = latoFontFamily,
+                                                modifier = Modifier
+                                            )
+                                        }
+                                    }
+                                    Spacer(modifier = Modifier.size(0.01 * screenHeight))
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceEvenly,
+                                        verticalAlignment = Alignment.CenterVertically,
+                                    ) {
+                                        Column(
+                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                            modifier = Modifier
+                                        ) {
+                                            Text(
+                                                text = "Last Irrigated",
+                                                fontSize = 28.sp,
+                                                fontFamily = latoFontFamily,
+                                                color = Color.Black,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                            Text(
+                                                text = date,
+                                                fontSize = 46.sp,
+                                                fontFamily = latoFontFamily,
+                                                color = Primary,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                        }
+                                        Column(
+                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                            modifier = Modifier
                                         ) {
                                             LastIrrigatedBadge(
                                                 timestamp = sampleIrrigationTime,
@@ -329,60 +384,15 @@ fun HomePage(navController: NavController){
                                             )
                                         }
                                     }
-                                    Spacer(modifier = Modifier.size(0.01 * screenHeight))
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ){
-                                        // --- COLUMN 1: WATER TANK ---
-                                        Column(
-                                            horizontalAlignment = Alignment.CenterHorizontally,
-                                            modifier = Modifier
-                                                .weight(1f)
-                                        ){
-                                            Text(
-                                                text = "69% Water Level",
-                                                fontSize = 18.sp,
-                                                fontFamily = latoFontFamily,
-                                                color = Accent,
-                                                fontWeight = FontWeight.Bold
-                                            )
-                                            Text(
-                                                text = "Community Tank",
-                                                color = Color(0xFFA1A7B0),
-                                                fontSize = 16.sp,
-                                                fontFamily = latoFontFamily,
-                                                modifier = Modifier
-                                            )
-                                        }
-                                        Column(
-                                            horizontalAlignment = Alignment.CenterHorizontally,
-                                            modifier = Modifier
-                                                .weight(1f)
-                                        ){
-                                            Text(
-                                                text = "Last Irrigated",
-                                                fontSize = 18.sp,
-                                                fontFamily = latoFontFamily,
-                                                color = Primary,
-                                                fontWeight = FontWeight.Bold
-                                            )
-                                            Text(
-                                                text = "Automated System",
-                                                color = Color(0xFFA1A7B0),
-                                                fontSize = 16.sp,
-                                                fontFamily = latoFontFamily,
-                                                modifier = Modifier
-                                            )
-                                        }
-                                    }
                                 }
                             }
                         }
                         item {
                             Box(
                                 modifier = Modifier
+                                    .clickable {
+                                        navController.navigate("crop")
+                                    }
                                     .fillMaxWidth()
                                     .padding(
                                         horizontal = 0.04 * screenWidth,
@@ -411,7 +421,7 @@ fun HomePage(navController: NavController){
                                         Text(
                                             text = "Soil Data from Probes",
                                             color = Color.Black,
-                                            fontSize = 20.sp,
+                                            fontSize = 22.sp,
                                             fontFamily = latoFontFamily,
                                             fontWeight = FontWeight.Bold,
                                             modifier = Modifier
@@ -438,34 +448,34 @@ fun HomePage(navController: NavController){
                                         Text(
                                             text = "Probe 1",
                                             color = Primary,
-                                            fontSize = 16.sp,
+                                            fontSize = 18.sp,
                                             fontFamily = latoFontFamily,
                                             textAlign = TextAlign.Center,
                                             fontWeight = FontWeight.Bold,
                                             modifier = Modifier.weight(1f)
                                         )
                                         Text(
-                                            text = "Probe 2",
+                                            text = "Probe NA",
                                             color = Primary,
-                                            fontSize = 16.sp,
+                                            fontSize = 18.sp,
                                             fontFamily = latoFontFamily,
                                             textAlign = TextAlign.Center,
                                             fontWeight = FontWeight.Bold,
                                             modifier = Modifier.weight(1f)
                                         )
                                         Text(
-                                            text = "Probe 3",
+                                            text = "Probe NA",
                                             color = Primary,
-                                            fontSize = 16.sp,
+                                            fontSize = 18.sp,
                                             fontFamily = latoFontFamily,
                                             textAlign = TextAlign.Center,
                                             fontWeight = FontWeight.Bold,
                                             modifier = Modifier.weight(1f)
                                         )
                                         Text(
-                                            text = "Probe 4",
+                                            text = "Probe NA",
                                             color = Primary,
-                                            fontSize = 16.sp,
+                                            fontSize = 18.sp,
                                             fontFamily = latoFontFamily,
                                             textAlign = TextAlign.Center,
                                             fontWeight = FontWeight.Bold,
@@ -474,91 +484,85 @@ fun HomePage(navController: NavController){
                                     }
                                 }
                             }
-                            Spacer(modifier = Modifier.size(0.3 * screenHeight))
                         }
-                    }
+                        item {
+//                            Box(
+//                                modifier = Modifier
+//                                    .fillMaxWidth()
+//                                    .padding(
+//                                        horizontal = 0.04 * screenWidth,
+//                                        vertical = 0.005 * screenHeight
+//                                    )
+//                            ) {
+//                                Column(
+//                                    modifier = Modifier
+//                                        .fillMaxWidth()
+//                                        .background(
+//                                            color = Color(0xFFFFFFFF),
+//                                            shape = RoundedCornerShape(20.dp)
+//                                        )
+//                                        .border(
+//                                            width = 1.dp,
+//                                            color = Color.White.copy(alpha = 0.3f),
+//                                            shape = RoundedCornerShape(20.dp)
+//                                        ),
+//                                ) {
+//                                    Column(modifier = Modifier.padding(20.dp)) {
+//                                        Row(
+//                                            verticalAlignment = Alignment.CenterVertically,
+//                                            modifier = Modifier.padding(bottom = 16.dp)
+//                                        ) {
+//                                            Text(
+//                                                text = "Smart Recommendations",
+//                                                color = Color.Black,
+//                                                fontSize = 22.sp,
+//                                                fontFamily = latoFontFamily,
+//                                                fontWeight = FontWeight.Bold,
+//                                                modifier = Modifier
+//                                            )
+//                                        }
+//                                        Row(
+//                                            verticalAlignment = Alignment.CenterVertically
+//                                        ) {
+//                                            Icon(
+//                                                painterResource(R.drawable.alert),
+//                                                contentDescription = "alert_icon",
+//                                                tint = Color(0xFFFFC107),
+//                                                modifier = Modifier.size(28.dp)
+//                                            )
+//                                            Spacer(modifier = Modifier.width(18.dp))
+//                                            Text(
+//                                                text = "Tiling is recommended at sector 3, to improve water retention in your soil.",
+//                                                color = Color.Black,
+//                                                fontSize = 16.sp,
+//                                                fontFamily = latoFontFamily,
+//                                                modifier = Modifier
+//                                            )
+//                                        }
+//                                        Spacer(modifier = Modifier.height(16.dp))
+//                                        Row(
+//                                            verticalAlignment = Alignment.CenterVertically
+//                                        ) {
+//                                            Icon(
+//                                                painterResource(R.drawable.alert),
+//                                                contentDescription = "alert_icon",
+//                                                tint = Color(0xFFFFC107),
+//                                                modifier = Modifier.size(28.dp)
+//                                            )
+//                                            Spacer(modifier = Modifier.width(18.dp))
+//                                            Text(
+//                                                text = "Plant Stress is currently high. Take appropriate measures to protect your crops.",
+//                                                color = Color.Black,
+//                                                fontSize = 16.sp,
+//                                                fontFamily = latoFontFamily,
+//                                                modifier = Modifier
+//                                            )
+//                                        }
+//                                    }
+//                                }
+//                            }
 
-                    // Bottom Navigation Bar
-                    Row(
-                        modifier = Modifier
-                            .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Bottom))
-                            .align(Alignment.BottomCenter)
-                            .fillMaxWidth()
-                            .height(0.07 * screenHeight)
-                            .padding(
-                                horizontal = 0.065 * screenWidth
-                            )
-                            .background(
-                                shape = RoundedCornerShape(40.dp),
-                                color = SproutGreen
-                            ),
-                        horizontalArrangement = Arrangement.SpaceEvenly,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        IconButton(
-                            onClick = {},
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(25.dp))
-                                .size(45.dp)
-                                .background(
-                                    color = Primary,
-                                    shape = RoundedCornerShape(50)
-                                )
-                        ) {
-                            Icon(
-                                painter = painterResource(R.drawable.home),
-                                contentDescription = "home",
-                                Modifier.size(24.dp),
-                                tint = Color.Black
-                            )
-                        }
-                        Spacer(modifier = Modifier.size(8.dp))
-                        IconButton(
-                            onClick = {
-                                navController.navigate("weather")
-                            },
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(50))
-                                .size(45.dp)
-                        ) {
-                            Icon(
-                                painter = painterResource(R.drawable.weather_na),
-                                contentDescription = "cart_na",
-                                Modifier.size(32.dp),
-                                tint = Accent
-                            )
-                        }
-                        Spacer(modifier = Modifier.size(8.dp))
-                        IconButton(
-                            onClick = {
-                                navController.navigate("security")
-                            },
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(50))
-                                .size(45.dp)
-                        ) {
-                            Icon(
-                                painter = painterResource(R.drawable.harvest_na),
-                                contentDescription = "explore",
-                                Modifier.size(32.dp),
-                                tint = Accent
-                            )
-                        }
-                        Spacer(modifier = Modifier.size(8.dp))
-                        IconButton(
-                            onClick = {
-                                navController.navigate("projects")
-                            },
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(50))
-                                .size(45.dp)
-                        ) {
-                            Icon(
-                                painter = painterResource(R.drawable.wateringcan_na),
-                                contentDescription = "cart_na",
-                                Modifier.size(32.dp),
-                                tint = Accent
-                            )
+                            Spacer(modifier = Modifier.size(0.11 * screenHeight))
                         }
                     }
                 }
