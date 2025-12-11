@@ -79,7 +79,7 @@ fun SplashScreen(navController: NavController) {
 
         // Navigate to the next screen ("home")
         navController.popBackStack() // Clear the back stack
-        navController.navigate("home") {
+        navController.navigate("select") {
             // Ensure the splash screen is not on the back stack
             popUpTo(navController.graph.startDestinationId) { inclusive = true }
         }

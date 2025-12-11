@@ -8,7 +8,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.smartagro.ui.screens.CropPage
 import com.example.smartagro.ui.screens.HomePage
+import com.example.smartagro.ui.screens.IrrigationPage
 import com.example.smartagro.ui.screens.LoginPage
+import com.example.smartagro.ui.screens.PlaceNodePage
 import com.example.smartagro.ui.screens.SelectCropPage
 import com.example.smartagro.ui.screens.SplashScreen
 import com.example.smartagro.ui.screens.WeatherPage
@@ -39,6 +41,11 @@ fun AppNavigation(navController: NavHostController) {
         composable("select") {
             SelectCropPage(navController)
         }
-
+        composable("irrigation") {
+            IrrigationPage(navController)
+        }
+        composable("place") {
+            PlaceNodePage(navController)
+        }
     }
 }

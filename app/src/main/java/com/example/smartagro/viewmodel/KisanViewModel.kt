@@ -84,4 +84,37 @@ class KisanViewModel : ViewModel() {
                 Log.e("Firebase", "Failed to update metadata.", e)
             }
     }
+
+    fun updateIrrigationStatus(newStatus: Boolean) {
+
+        val statusMap = hashMapOf<String, Any>(
+            "IrrigationStatus" to newStatus
+        )
+
+        // Path: Niranj/IrrigationStatus
+        kisanRef.updateChildren(statusMap)
+            .addOnSuccessListener {
+                Log.d("Firebase", "IrrigationStatus updated successfully!")
+            }
+            .addOnFailureListener { e ->
+                Log.e("Firebase", "Failed to update IrrigationStatus", e)
+            }
+    }
+    fun updateValveStatus(valve1: Boolean, valve2: Boolean) {
+
+        val statusMap = hashMapOf<String, Any>(
+            "Valve1" to valve1,
+            "Valve2" to valve2
+        )
+
+        // Path: Niranj/IrrigationStatus
+        kisanRef.updateChildren(statusMap)
+            .addOnSuccessListener {
+                Log.d("Firebase", "IrrigationStatus updated successfully!")
+            }
+            .addOnFailureListener { e ->
+                Log.e("Firebase", "Failed to update IrrigationStatus", e)
+            }
+    }
+
 }

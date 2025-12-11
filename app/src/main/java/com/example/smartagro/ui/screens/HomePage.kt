@@ -264,6 +264,7 @@ fun HomePage(navController: NavController){
                             Box(
                                 modifier = Modifier
                                     .clickable {
+                                        navController.navigate("irrigation")
                                     }
                                     .fillMaxWidth()
                                     .padding(
@@ -299,7 +300,7 @@ fun HomePage(navController: NavController){
                                             modifier = Modifier
                                         )
                                         Text(
-                                            text = "System Idle",
+                                            text = if (data.IrrigationStatus) "System Active" else "System Idle",
                                             color = Accent,
                                             fontSize = 18.sp,
                                             fontFamily = latoFontFamily,

@@ -18,6 +18,9 @@ data class Node1Data( // Represents the sensor data inside 'Node1'
 
 data class FarmDataContainer( // Represents the parent of Node1 (i.e., the original 'FarmData' node)
     val Node1: Node1Data = Node1Data(),
+    val Node2: Node1Data = Node1Data(),
+    val Node3: Node1Data = Node1Data(),
+    val Node4: Node1Data = Node1Data(),
     // You can add Node2, Node3, etc., here if needed: val Node2: Node1Data = Node1Data()
 )
 
@@ -30,6 +33,9 @@ data class KisanData(
     val Crop: String = "",
     val FarmType: String = "",
     val Name: String = "",
+    val IrrigationStatus: Boolean = false,
+    val Valve1: Boolean = false,
+    val Valve2: Boolean = false,
 
     // Nested structures
     val FarmData: FarmDataContainer = FarmDataContainer(), // Points to the Node1 holder

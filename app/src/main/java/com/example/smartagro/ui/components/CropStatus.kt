@@ -2,6 +2,7 @@ package com.example.smartagro.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
@@ -85,6 +87,73 @@ fun AnimatedStatusIndicator(
                 modifier = Modifier
                     .size(150.dp)
                     .alpha(pulseAlpha) // Apply the pulsing effect
+            )
+        }
+    }
+}
+
+
+@Composable
+fun IrrigationIndicator(
+    isTrue: Boolean,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        contentAlignment = Alignment.Center
+    ) {
+
+        // --- ✔️ SUCCESS (Pulsing Tick) ---
+        AnimatedVisibility(
+            visible = isTrue,
+            enter = expandVertically(
+                animationSpec = tween(500, easing = FastOutSlowInEasing),
+                expandFrom = Alignment.Top
+            ),
+            exit = shrinkVertically(
+                animationSpec = tween(500, easing = FastOutSlowInEasing),
+                shrinkTowards = Alignment.Top
+            )
+        ) {
+
+            // Add pulsing only for Tick
+            val infiniteTransition = rememberInfiniteTransition(label = "TickPulse")
+            val pulseAlpha by infiniteTransition.animateFloat(
+                initialValue = 1.0f,
+                targetValue = 0.3f,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(1000, easing = FastOutSlowInEasing),
+                    repeatMode = RepeatMode.Reverse
+                ),
+                label = "TickAlpha"
+            )
+
+            Icon(
+                imageVector = Icons.Filled.CheckCircle,
+                contentDescription = "Success",
+                tint = SuccessColor,
+                modifier = Modifier
+                    .size(110.dp)
+                    .alpha(pulseAlpha) // ✔️ Tick pulses now
+            )
+        }
+
+        // --- ❌ WARNING (Static Cross) ---
+        AnimatedVisibility(
+            visible = !isTrue,
+            enter = expandVertically(
+                animationSpec = tween(800, easing = FastOutSlowInEasing),
+                expandFrom = Alignment.Top
+            ),
+            exit = shrinkVertically(
+                animationSpec = tween(800, easing = FastOutSlowInEasing),
+                shrinkTowards = Alignment.Top
+            )
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Close,
+                contentDescription = "Warning",
+                tint = WarningColor,
+                modifier = Modifier.size(110.dp) // static, no alpha animation
             )
         }
     }
