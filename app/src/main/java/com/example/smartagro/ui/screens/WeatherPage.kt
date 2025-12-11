@@ -56,6 +56,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -104,8 +105,8 @@ fun WeatherPage(navController: NavController) {
     val data by KisanViewModel.kisanData.collectAsState()
 
     // 2. Safely access the nested data
-    val humidity = data.WeatherData.Humidity
-    val temperature = data.WeatherData.Temperature
+    val humidity = data.FarmData.Node1.Humidity
+    val temperature = data.FarmData.Node1.Temperature
     val rain = data.WeatherData.RainPercent
 
     val weatherData = listOf(
@@ -216,11 +217,12 @@ fun WeatherPage(navController: NavController) {
                                             verticalArrangement = Arrangement.Center
                                         ) {
                                             Text(
-                                                text = "Jorethang, Sikkim",
+                                                text = data.Location,
                                                 color = Secondary,
                                                 fontSize = 20.sp,
                                                 fontFamily = latoFontFamily,
-                                                fontWeight = FontWeight.Bold
+                                                fontWeight = FontWeight.Bold,
+                                                textAlign = TextAlign.Center
                                             )
                                             Spacer(modifier = Modifier.size(0.01 * screenHeight))
                                             Text(

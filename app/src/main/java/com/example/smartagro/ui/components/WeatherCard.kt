@@ -94,7 +94,7 @@ fun WeatherCard(item: WeatherItem) {
                 style = MaterialTheme.typography.headlineMedium,
                 color = Color(0xFF2d3436), // Dark charcoal for readability
                 fontWeight = FontWeight.Bold,
-                fontSize = 50.sp,
+                fontSize = 46.sp,
             )
         }
     }

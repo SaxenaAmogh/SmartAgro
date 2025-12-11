@@ -102,21 +102,25 @@ fun HomePage(navController: NavController){
     val KisanViewModel: KisanViewModel = viewModel()
     val data by KisanViewModel.kisanData.collectAsState()
 
-    val humidity = data.WeatherData.Humidity
-    val temperature = data.WeatherData.Temperature
+    val humidity = data.FarmData.Node1.Humidity
+    val temperature = data.FarmData.Node1.Temperature
 
-    val soiltemp = data.FarmData.SoilTemperature
-    val soilmoisture = data.FarmData.SoilMoisture
-    val nodeTemp = data.FarmData.Temperature
-    val nodeHumidity = data.FarmData.Humidity
-    val stage = data.FarmData.Stage
-    val moisturePercentage: Float = soilmoisture * 0.01f
+    val soiltemp = data.FarmData.Node1.SoilTemperature
+    val soilmoisture = data.FarmData.Node1.SoilMoisture
+    val nodeTemp = data.FarmData.Node1.Temperature
+    val nodeHumidity = data.FarmData.Node1.Humidity
+
+    val moisturePercentage: Double = soilmoisture * 0.01f
+
     val probes: List<ProbeData> = listOf(
-        ProbeData(1, moisturePercentage, soiltemp),
+        ProbeData(1, data.FarmData.Node1.SoilMoisture.toFloat(), soiltemp.toInt()),
         ProbeData(2, 0.0f, 0),
         ProbeData(3, 0.0f, 0),
         ProbeData(4, 0.0f, 0)
     )
+
+    val kisanname = data.Name
+    val location = data.Location
 
     Scaffold(
         content = {
@@ -149,7 +153,11 @@ fun HomePage(navController: NavController){
                                 ) {
                                     Column(
                                         modifier = Modifier
-                                            .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Top))
+                                            .windowInsetsPadding(
+                                                WindowInsets.systemBars.only(
+                                                    WindowInsetsSides.Top
+                                                )
+                                            )
                                             .padding(
                                                 horizontal = 0.05 * screenWidth
                                             )
@@ -162,7 +170,7 @@ fun HomePage(navController: NavController){
                                         ) {
                                             Column {
                                                 Text(
-                                                    text = "Namaste, Niranj",
+                                                    text = "Namaste, $kisanname",
                                                     color = Color.White,
                                                     fontSize = 32.sp,
                                                     fontFamily = latoFontFamily,
@@ -170,7 +178,7 @@ fun HomePage(navController: NavController){
                                                     modifier = Modifier
                                                 )
                                                 Text(
-                                                    text = "Jorethang, Sikkim",
+                                                    text = location,
                                                     color = Secondary,
                                                     fontSize = 20.sp,
                                                     fontFamily = latoFontFamily,
@@ -312,7 +320,9 @@ fun HomePage(navController: NavController){
                                         ) {
                                             WaterTank(
                                                 percentage = 0.55f,
-                                                modifier = Modifier.width(165.dp).height(180.dp)
+                                                modifier = Modifier
+                                                    .width(165.dp)
+                                                    .height(180.dp)
                                             )
                                         }
                                         Spacer(modifier = Modifier.width(0.01 * screenWidth))

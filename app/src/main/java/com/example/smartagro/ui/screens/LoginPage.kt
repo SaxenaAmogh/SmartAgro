@@ -171,7 +171,7 @@ fun LoginPage(navController: NavController) {
                         Spacer(modifier = Modifier.size(0.02 * screenHeight))
                         FloatingActionButton(
                             onClick = {
-                                navController.navigate("home")
+                                navController.navigate("splash")
                             },
                             modifier = Modifier
                                 .fillMaxWidth(),

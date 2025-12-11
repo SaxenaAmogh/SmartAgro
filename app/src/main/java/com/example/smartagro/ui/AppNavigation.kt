@@ -10,6 +10,7 @@ import com.example.smartagro.ui.screens.CropPage
 import com.example.smartagro.ui.screens.HomePage
 import com.example.smartagro.ui.screens.LoginPage
 import com.example.smartagro.ui.screens.SelectCropPage
+import com.example.smartagro.ui.screens.SplashScreen
 import com.example.smartagro.ui.screens.WeatherPage
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -18,10 +19,10 @@ fun AppNavigation(navController: NavHostController) {
 
     NavHost(
         navController = navController,
-        startDestination = "select"
+        startDestination = "login"
     ) {
         composable("splash") {
-            //SplashScreen(navController)
+            SplashScreen(navController)
         }
         composable("login") {
             LoginPage(navController)

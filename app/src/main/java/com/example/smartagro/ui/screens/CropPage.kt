@@ -32,6 +32,11 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -48,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.smartagro.R
@@ -60,6 +66,7 @@ import com.example.smartagro.ui.theme.Primary
 import com.example.smartagro.ui.theme.Secondary
 import com.example.smartagro.ui.theme.SproutGreen
 import com.example.smartagro.ui.theme.latoFontFamily
+import com.example.smartagro.viewmodel.KisanViewModel
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -77,6 +84,26 @@ fun CropPage(navController: NavController) {
 
     if (windowInsetsController != null) {
         windowInsetsController.isAppearanceLightStatusBars = true
+    }
+    val KisanViewModel: KisanViewModel = viewModel()
+    val data by KisanViewModel.kisanData.collectAsState()
+
+    val soiltemp = data.FarmData.Node1.SoilTemperature
+    val soilmoisture = data.FarmData.Node1.SoilMoisture
+    var okTemp by remember { mutableStateOf(true) }
+    var okMoist by remember { mutableStateOf(true) }
+    val nodeTemp = data.FarmData.Node1.Temperature
+    val nodeHumidity = data.FarmData.Node1.Humidity
+
+    okMoist = if (soilmoisture !in 35.0..70.0){
+        false
+    } else {
+        true
+    }
+    okTemp = if (soiltemp !in 18.0..26.0){
+        false
+    } else {
+        true
     }
 
     Scaffold(
@@ -190,7 +217,7 @@ fun CropPage(navController: NavController) {
                                                 horizontalAlignment = Alignment.CenterHorizontally,
                                             ) {
                                                 AnimatedStatusIndicator(
-                                                    isTrue = false,
+                                                    isTrue = if (okTemp && okMoist){true} else {false},
                                                     modifier = Modifier.size(0.1 * screenHeight)
                                                 )
                                             }
@@ -253,7 +280,7 @@ fun CropPage(navController: NavController) {
                                             modifier = Modifier
                                         ) {
                                             AnimatedStatusIndicator(
-                                                isTrue = true,
+                                                isTrue = if (soiltemp>26){false} else if(soiltemp<18){false} else {true},
                                                 modifier = Modifier.size(0.1 * screenHeight)
                                             )
                                         }
@@ -270,15 +297,17 @@ fun CropPage(navController: NavController) {
                                                 fontWeight = FontWeight.Bold
                                             )
                                             Text(
-                                                text = "19 °C",
-                                                fontSize = 62.sp,
+                                                text = "$soiltemp°C",
+                                                fontSize = 52.sp,
                                                 fontFamily = latoFontFamily,
                                                 color = Accent,
                                                 fontWeight = FontWeight.Bold
                                             )
                                             Text(
-                                                text = "Optimal",
-                                                color = Primary,
+                                                text = if (soiltemp >= 26){"Too High"}else if(soiltemp <=18){"Too Low"} else "Normal",
+                                                color = if (soiltemp >= 26){Color(0xFFFFC107)
+                                                }else if(soiltemp <=18){Color(0xFFFFCE3A)
+                                                } else Primary,
                                                 fontSize = 24.sp,
                                                 fontFamily = latoFontFamily,
                                                 fontWeight = FontWeight.Bold
@@ -351,7 +380,7 @@ fun CropPage(navController: NavController) {
                                             modifier = Modifier
                                         ) {
                                             AnimatedStatusIndicator(
-                                                isTrue = false,
+                                                isTrue = if (soilmoisture>=70){false} else if(soilmoisture<=35){false} else {true},
                                                 modifier = Modifier.size(0.1 * screenHeight)
                                             )
                                         }
@@ -368,15 +397,17 @@ fun CropPage(navController: NavController) {
                                                 fontWeight = FontWeight.Bold
                                             )
                                             Text(
-                                                text = "66%",
-                                                fontSize = 62.sp,
+                                                text = "$soilmoisture%",
+                                                fontSize = 52.sp,
                                                 fontFamily = latoFontFamily,
                                                 color = Accent,
                                                 fontWeight = FontWeight.Bold
                                             )
                                             Text(
-                                                text = "Too High",
-                                                color = Color(0xFFEF4444),
+                                                text = if (soilmoisture >= 70){"Too High"}else if(soilmoisture <=35){"Too Low"} else "Normal",
+                                                color = if (soilmoisture >= 70){Color(0xFFFFC107)
+                                                }else if(soilmoisture <=35){Color(0xFFFFCE3A)
+                                                } else Primary,
                                                 fontSize = 24.sp,
                                                 fontFamily = latoFontFamily,
                                                 fontWeight = FontWeight.Bold

@@ -42,9 +42,16 @@ android {
     }
 }
 
+
 dependencies {
     implementation(platform("com.google.firebase:firebase-bom:34.6.0"))
     implementation("com.google.firebase:firebase-database")
+        // Play services location
+    implementation ("com.google.android.gms:play-services-location:21.0.1") // or latest
+
+        // Google Maps Compose
+    implementation ("com.google.maps.android:maps-compose:2.11.2")// check for latest
+    implementation ("com.google.android.gms:play-services-maps:18.1.0")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
