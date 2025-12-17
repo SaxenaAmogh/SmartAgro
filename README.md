@@ -77,18 +77,7 @@ SmartAgro provides a **technology-driven, affordable, and scalable solution** to
 
 ## 📸 Screenshots
 
-##Landing Page
-![Landing Page](screenshots/landing.png)
-
-### Home Dashboard
-![Home Dashboard](screenshots/homepage.png)
-
-### Weather Page
-![Weather Page](screenshots/weather.png)
-
-### Irrigation Status
-![Irrigation Status](screenshots/irrigation.png)
-
+All application UI screenshots are available in the `/screenshots` folder for reference.
 
 ---
 
