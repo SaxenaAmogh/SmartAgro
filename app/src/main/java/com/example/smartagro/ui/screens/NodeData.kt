@@ -2,7 +2,6 @@ package com.example.smartagro.ui.screens
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -26,9 +25,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,13 +36,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -56,22 +51,16 @@ import androidx.core.view.WindowCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.example.smartagro.R
 import com.example.smartagro.ui.components.AnimatedStatusIndicator
-import com.example.smartagro.ui.components.ForecastItem
-import com.example.smartagro.ui.components.WaterTank
 import com.example.smartagro.ui.theme.Accent
 import com.example.smartagro.ui.theme.Background
 import com.example.smartagro.ui.theme.Primary
-import com.example.smartagro.ui.theme.Secondary
-import com.example.smartagro.ui.theme.SproutGreen
 import com.example.smartagro.ui.theme.latoFontFamily
 import com.example.smartagro.viewmodel.KisanViewModel
 
-
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun CropPage(navController: NavController) {
+fun NodeData(navController: NavController, nodeId: String? = "Node1") {
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
     val screenHeight = configuration.screenHeightDp.dp
@@ -88,23 +77,33 @@ fun CropPage(navController: NavController) {
     val KisanViewModel: KisanViewModel = viewModel()
     val data by KisanViewModel.kisanData.collectAsState()
 
-    val soiltemp = (data.FarmData.Node1.SoilTemperature + data.FarmData.Node2.SoilTemperature + data.FarmData.Node3.SoilTemperature + data.FarmData.Node4.SoilTemperature)/1
-    val soilmoisture = 100 - data.FarmData.Node1.SoilMoisture
+    var soiltemp = 0.0
+    var soilmoisture = 0.0
+
+    when (nodeId) {
+        "Node1" -> {
+            soiltemp = data.FarmData.Node1.SoilTemperature
+            soilmoisture = data.FarmData.Node1.SoilMoisture
+        }
+        "Node2" -> {
+            soiltemp = data.FarmData.Node2.SoilTemperature
+            soilmoisture = data.FarmData.Node2.SoilMoisture
+        }
+        "Node3" -> {
+            soiltemp = data.FarmData.Node3.SoilTemperature
+            soilmoisture = data.FarmData.Node3.SoilMoisture
+        }
+        "Node4" -> {
+            soiltemp = data.FarmData.Node4.SoilTemperature
+            soilmoisture = data.FarmData.Node4.SoilMoisture
+        }
+    }
+
     var okTemp by remember { mutableStateOf(true) }
     var okMoist by remember { mutableStateOf(true) }
-    val nodeTemp = data.FarmData.Node1.Temperature
-    val nodeHumidity = data.FarmData.Node1.Humidity
 
-    okMoist = if (soilmoisture !in 35.0..70.0){
-        false
-    } else {
-        true
-    }
-    okTemp = if (soiltemp !in 18.0..26.0){
-        false
-    } else {
-        true
-    }
+    okMoist = soilmoisture in 35.0..70.0
+    okTemp = soiltemp in 18.0..26.0
 
     Scaffold(
         content = {
@@ -297,8 +296,8 @@ fun CropPage(navController: NavController) {
                                                 fontWeight = FontWeight.Bold
                                             )
                                             Text(
-                                                text = "${"%.1f".format(soiltemp)}°C",
-                                                fontSize = 48.sp,
+                                                text = "$soiltemp°C",
+                                                fontSize = 52.sp,
                                                 fontFamily = latoFontFamily,
                                                 color = Accent,
                                                 fontWeight = FontWeight.Bold
@@ -397,8 +396,8 @@ fun CropPage(navController: NavController) {
                                                 fontWeight = FontWeight.Bold
                                             )
                                             Text(
-                                                text = "${"%.1f".format(soilmoisture)}%",
-                                                fontSize = 48.sp,
+                                                text = "$soilmoisture%",
+                                                fontSize = 52.sp,
                                                 fontFamily = latoFontFamily,
                                                 color = Accent,
                                                 fontWeight = FontWeight.Bold
@@ -416,16 +415,12 @@ fun CropPage(navController: NavController) {
                                     }
                                     Spacer(modifier = Modifier.height(0.03 * screenWidth))
                                     Text(
-                                        text =
-                                        if (soilmoisture>70) "Recommendation: Delay next irrigation round to lower soil moisture levels."
-                                        else if (soilmoisture<20)"Recommendation: More water is needed. Consider manual controls."
-                                        else "No Recommendations or Alerts",
-                                        color = if (soilmoisture !in 35.0..70.0){Color(0xFFFFCE3A)} else {Color.Black},
+                                        text = "Recommendation: Stop next irrigation round to lower soil moisture levels.",
+                                        color = Color(0xFFD5AB2D),
                                         fontSize = 22.sp,
                                         fontFamily = latoFontFamily,
                                         fontWeight = FontWeight.Bold,
                                         textAlign = TextAlign.Center,
-                                        modifier = Modifier.fillMaxWidth()
                                     )
                                 }
                             }
@@ -440,6 +435,6 @@ fun CropPage(navController: NavController) {
 
 @Preview(showSystemUi = true)
 @Composable
-fun CropPagePreview(){
-    CropPage(rememberNavController())
+fun NodeDataPagePreview(){
+    NodeData(rememberNavController())
 }

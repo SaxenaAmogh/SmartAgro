@@ -3,7 +3,7 @@ package com.example.smartagro.ui.theme
 import androidx.compose.ui.graphics.Color
 
 val Primary = Color(0xFF378B6F)
-val Accent = Color(0xFF2682DC)
+val Accent = Color(0xFF2196F3)
 val Surface = Color(0xFFF8F6F2)
 val Secondary = Color(0xFFDCDCDC)
 val Background = Color(0xFFE6E7E6)

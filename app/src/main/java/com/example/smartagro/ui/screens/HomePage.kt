@@ -105,18 +105,11 @@ fun HomePage(navController: NavController){
     val humidity = data.FarmData.Node1.Humidity
     val temperature = data.FarmData.Node1.Temperature
 
-    val soiltemp = data.FarmData.Node1.SoilTemperature
-    val soilmoisture = data.FarmData.Node1.SoilMoisture
-    val nodeTemp = data.FarmData.Node1.Temperature
-    val nodeHumidity = data.FarmData.Node1.Humidity
-
-    val moisturePercentage: Double = soilmoisture * 0.01f
-
     val probes: List<ProbeData> = listOf(
-        ProbeData(1, data.FarmData.Node1.SoilMoisture.toFloat(), soiltemp.toInt()),
-        ProbeData(2, 0.0f, 0),
-        ProbeData(3, 0.0f, 0),
-        ProbeData(4, 0.0f, 0)
+        ProbeData(1, (100 - (data.FarmData.Node1.SoilMoisture.toFloat())) * 0.01f, data.FarmData.Node1.SoilTemperature.toInt()),
+        ProbeData(2, data.FarmData.Node2.SoilMoisture.toFloat() * 0.01f, data.FarmData.Node2.SoilTemperature.toInt()),
+        ProbeData(3, data.FarmData.Node3.SoilMoisture.toFloat() * 0.01f, data.FarmData.Node3.SoilTemperature.toInt()),
+        ProbeData(4, data.FarmData.Node4.SoilMoisture.toFloat() * 0.01f, data.FarmData.Node4.SoilTemperature.toInt())
     )
 
     val kisanname = data.Name
@@ -320,7 +313,7 @@ fun HomePage(navController: NavController){
                                             modifier = Modifier
                                         ) {
                                             WaterTank(
-                                                percentage = 0.55f,
+                                                percentage = data.WaterTank.toFloat() * 0.01f,
                                                 modifier = Modifier
                                                     .width(165.dp)
                                                     .height(180.dp)
@@ -339,14 +332,14 @@ fun HomePage(navController: NavController){
                                                 fontWeight = FontWeight.Bold
                                             )
                                             Text(
-                                                text = "55%",
+                                                text = "${data.WaterTank}%",
                                                 fontSize = 62.sp,
                                                 fontFamily = latoFontFamily,
                                                 color = Accent,
                                                 fontWeight = FontWeight.Bold
                                             )
                                             Text(
-                                                text = "Community Tank",
+                                                text = "Trench Grp1",
                                                 color = Color(0xFFA1A7B0),
                                                 fontSize = 20.sp,
                                                 fontFamily = latoFontFamily,
@@ -373,7 +366,7 @@ fun HomePage(navController: NavController){
                                                 fontWeight = FontWeight.Bold
                                             )
                                             Text(
-                                                text = date,
+                                                text = data.LastIrrigated,
                                                 fontSize = 46.sp,
                                                 fontFamily = latoFontFamily,
                                                 color = Primary,
@@ -385,7 +378,7 @@ fun HomePage(navController: NavController){
                                             modifier = Modifier
                                         ) {
                                             LastIrrigatedBadge(
-                                                timestamp = sampleIrrigationTime,
+                                                timestamp = data.LastTime,
                                                 modifier = Modifier
                                                     .fillMaxWidth()
                                                     .aspectRatio(1f)
@@ -463,7 +456,7 @@ fun HomePage(navController: NavController){
                                             modifier = Modifier.weight(1f)
                                         )
                                         Text(
-                                            text = "Probe NA",
+                                            text = "Probe 2",
                                             color = Primary,
                                             fontSize = 18.sp,
                                             fontFamily = latoFontFamily,
@@ -472,7 +465,7 @@ fun HomePage(navController: NavController){
                                             modifier = Modifier.weight(1f)
                                         )
                                         Text(
-                                            text = "Probe NA",
+                                            text = "Probe 3",
                                             color = Primary,
                                             fontSize = 18.sp,
                                             fontFamily = latoFontFamily,
@@ -481,7 +474,7 @@ fun HomePage(navController: NavController){
                                             modifier = Modifier.weight(1f)
                                         )
                                         Text(
-                                            text = "Probe NA",
+                                            text = "Probe 4",
                                             color = Primary,
                                             fontSize = 18.sp,
                                             fontFamily = latoFontFamily,
@@ -492,90 +485,12 @@ fun HomePage(navController: NavController){
                                     }
                                 }
                             }
-                        }
-                        item {
-//                            Box(
-//                                modifier = Modifier
-//                                    .fillMaxWidth()
-//                                    .padding(
-//                                        horizontal = 0.04 * screenWidth,
-//                                        vertical = 0.005 * screenHeight
-//                                    )
-//                            ) {
-//                                Column(
-//                                    modifier = Modifier
-//                                        .fillMaxWidth()
-//                                        .background(
-//                                            color = Color(0xFFFFFFFF),
-//                                            shape = RoundedCornerShape(20.dp)
-//                                        )
-//                                        .border(
-//                                            width = 1.dp,
-//                                            color = Color.White.copy(alpha = 0.3f),
-//                                            shape = RoundedCornerShape(20.dp)
-//                                        ),
-//                                ) {
-//                                    Column(modifier = Modifier.padding(20.dp)) {
-//                                        Row(
-//                                            verticalAlignment = Alignment.CenterVertically,
-//                                            modifier = Modifier.padding(bottom = 16.dp)
-//                                        ) {
-//                                            Text(
-//                                                text = "Smart Recommendations",
-//                                                color = Color.Black,
-//                                                fontSize = 22.sp,
-//                                                fontFamily = latoFontFamily,
-//                                                fontWeight = FontWeight.Bold,
-//                                                modifier = Modifier
-//                                            )
-//                                        }
-//                                        Row(
-//                                            verticalAlignment = Alignment.CenterVertically
-//                                        ) {
-//                                            Icon(
-//                                                painterResource(R.drawable.alert),
-//                                                contentDescription = "alert_icon",
-//                                                tint = Color(0xFFFFC107),
-//                                                modifier = Modifier.size(28.dp)
-//                                            )
-//                                            Spacer(modifier = Modifier.width(18.dp))
-//                                            Text(
-//                                                text = "Tiling is recommended at sector 3, to improve water retention in your soil.",
-//                                                color = Color.Black,
-//                                                fontSize = 16.sp,
-//                                                fontFamily = latoFontFamily,
-//                                                modifier = Modifier
-//                                            )
-//                                        }
-//                                        Spacer(modifier = Modifier.height(16.dp))
-//                                        Row(
-//                                            verticalAlignment = Alignment.CenterVertically
-//                                        ) {
-//                                            Icon(
-//                                                painterResource(R.drawable.alert),
-//                                                contentDescription = "alert_icon",
-//                                                tint = Color(0xFFFFC107),
-//                                                modifier = Modifier.size(28.dp)
-//                                            )
-//                                            Spacer(modifier = Modifier.width(18.dp))
-//                                            Text(
-//                                                text = "Plant Stress is currently high. Take appropriate measures to protect your crops.",
-//                                                color = Color.Black,
-//                                                fontSize = 16.sp,
-//                                                fontFamily = latoFontFamily,
-//                                                modifier = Modifier
-//                                            )
-//                                        }
-//                                    }
-//                                }
-//                            }
-
-                            Spacer(modifier = Modifier.size(0.11 * screenHeight))
+                            Spacer(modifier = Modifier.size(0.035 * screenHeight))
                         }
                     }
                 }
             }
-        },
+        }
     )
 }
 

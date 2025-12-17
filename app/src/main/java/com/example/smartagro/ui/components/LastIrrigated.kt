@@ -50,7 +50,7 @@ val FarmLightBg = Color(0xFFEFF6FF) // Very light blue background
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun LastIrrigatedBadge(
-    timestamp: Instant,
+    timestamp: String,
     modifier: Modifier = Modifier, // Pass the fillMaxWidth/aspectRatio here
     primaryColor: Color = FarmBlue,
     accentColor: Color = FarmTeal
@@ -67,7 +67,6 @@ fun LastIrrigatedBadge(
         animationSpec = infiniteRepeatable(tween(1500, easing = FastOutSlowInEasing), RepeatMode.Restart),
         label = "alpha"
     )
-    val (dateStr, timeStr) = remember(timestamp) { formatTimestamp(timestamp) }
 
     // KEY FIX: Use BoxWithConstraints to know how big we are allowed to be
     BoxWithConstraints(
@@ -114,7 +113,7 @@ fun LastIrrigatedBadge(
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Icon(painterResource(com.example.smartagro.R.drawable.clock), null, tint = Color.Gray, modifier = Modifier.size(34.dp))
                 Spacer(Modifier.height(2.dp))
-                Text(timeStr, fontSize = 28.sp, color = Color.Gray)
+                Text(timestamp, fontSize = 28.sp, color = Color.Gray)
             }
         }
     }

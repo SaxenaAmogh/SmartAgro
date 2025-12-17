@@ -52,6 +52,8 @@ dependencies {
         // Google Maps Compose
     implementation ("com.google.maps.android:maps-compose:2.11.2")// check for latest
     implementation ("com.google.android.gms:play-services-maps:18.1.0")
+    implementation("androidx.activity:activity-compose:1.8.2")
+    implementation("com.journeyapps:zxing-android-embedded:4.3.0")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

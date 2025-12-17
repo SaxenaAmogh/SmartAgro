@@ -61,7 +61,7 @@ fun SplashScreen(navController: NavController) {
     val scale by animateFloatAsState(
         targetValue = if (startAnimation) 1.0f else 1.2f,
         animationSpec = tween(
-            durationMillis = 2000 // 2 seconds
+            durationMillis = 1000 // 1 seconds
         ),
         label = "ZoomAnimation"
     )
@@ -79,7 +79,7 @@ fun SplashScreen(navController: NavController) {
 
         // Navigate to the next screen ("home")
         navController.popBackStack() // Clear the back stack
-        navController.navigate("select") {
+        navController.navigate("login") {
             // Ensure the splash screen is not on the back stack
             popUpTo(navController.graph.startDestinationId) { inclusive = true }
         }

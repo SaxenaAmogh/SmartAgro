@@ -52,7 +52,8 @@ class KisanViewModel : ViewModel() {
         newLocation: String,
         newCrop: String,
         newFarmType: String,
-        newName: String
+        newName: String,
+        parent: Boolean
     ) {
         // 1. Create a Map containing only the keys and values you want to change.
         val metadataUpdates = hashMapOf<String, Any>(
@@ -61,7 +62,8 @@ class KisanViewModel : ViewModel() {
             "Location" to newLocation,
             "Crop" to newCrop,
             "FarmType" to newFarmType,
-            "Name" to newName
+            "Name" to newName,
+            "Parent" to parent
         )
 
         // 2. Use updateChildren() to apply the map to the current node (kisanRef).
@@ -116,5 +118,18 @@ class KisanViewModel : ViewModel() {
                 Log.e("Firebase", "Failed to update IrrigationStatus", e)
             }
     }
+    fun updateNodePosition(nodeName: String, newPosition: Int) {
+        val positionMap = hashMapOf<String, Any>(
+            nodeName to newPosition
+        )
 
+        // Path Example: Niranj/Node1Pos
+        kisanRef.updateChildren(positionMap)
+            .addOnSuccessListener {
+                Log.d("Firebase", "$nodeName updated successfully to position $newPosition")
+            }
+            .addOnFailureListener { e ->
+                Log.e("Firebase", "Failed to update $nodeName", e)
+            }
+    }
 }

@@ -2,6 +2,8 @@ package com.example.smartagro.ui.screens
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -21,9 +23,14 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
@@ -31,6 +38,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,11 +55,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.smartagro.R
@@ -60,6 +70,28 @@ import com.example.smartagro.ui.theme.Primary
 import com.example.smartagro.ui.theme.Secondary
 import com.example.smartagro.ui.theme.Surface
 import com.example.smartagro.ui.theme.latoFontFamily
+import com.example.smartagro.viewmodel.KisanViewModel
+import com.google.zxing.integration.android.IntentIntegrator
+
+
+// Data class to store the result
+data class ScanResultState(
+    val scannedText: String? = null,
+    val isScanning: Boolean = false
+)
+
+// Dummy function to simulate storing data (e.g., to a database or local storage)
+fun storeScannedText(text: String?) {
+    if (text != null) {
+        // Replace this with your actual ViewModel/Database write logic
+        println("--- SAVING DATA ---")
+        println("Scanned and Stored: $text")
+        // Example: myViewModel.saveQrCode(text)
+        // ... (Your actual data storage logic goes here) ...
+        println("--- SAVE COMPLETE ---")
+    }
+}
+
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -68,7 +100,6 @@ fun LoginPage(navController: NavController) {
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
     val screenHeight = configuration.screenHeightDp.dp
-    val context = LocalContext.current
 
     var mobileNumber by remember { mutableStateOf("") }
 
@@ -79,6 +110,64 @@ fun LoginPage(navController: NavController) {
 
     if (windowInsetsController != null) {
         windowInsetsController.isAppearanceLightStatusBars = true
+    }
+    val context = LocalContext.current
+
+    // State to hold the result and UI status
+    var scanState by remember { mutableStateOf(ScanResultState()) }
+
+    val KisanViewModel: KisanViewModel = viewModel()
+    val data by KisanViewModel.kisanData.collectAsState()
+
+    // --- 1. Activity Result Launcher for ZXing ---
+    val scanLauncher = rememberLauncherForActivityResult(
+        contract = androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        val intentResult = IntentIntegrator.parseActivityResult(
+            IntentIntegrator.REQUEST_CODE,
+            result.resultCode,
+            result.data
+        )
+
+        val scannedText = intentResult?.contents
+
+        scanState = ScanResultState(
+            scannedText = scannedText,
+            isScanning = false
+        )
+
+        storeScannedText(scannedText)
+
+        if (scannedText?.contains("Node1") ?: false && data.Node1!=0) {
+            navController.navigate("node/$scannedText")
+        } else if (scannedText?.contains("Node2") ?: false && data.Node2!=0) {
+            navController.navigate("node/$scannedText")
+        }else if (scannedText?.contains("Node3") ?: false && data.Node3!=0) {
+            navController.navigate("node/$scannedText")
+        }else if (scannedText?.contains("Node4") ?: false && data.Node4!=0) {
+            navController.navigate("node/$scannedText")
+        }else if (scannedText?.contains("Node") ?: false) {
+            navController.navigate("place/$scannedText")
+        }else if (scannedText?.contains("Parent") ?: false && data.Parent) {
+            navController.navigate("home")
+        }else if (scannedText?.contains("Parent") ?: false) {
+            navController.navigate("select")
+        }
+    }
+
+    // --- 3. Function to Launch the Scanner ---
+    // inside your composable where scanLauncher is defined
+    fun startScan() {
+        val integrator = IntentIntegrator(context as ComponentActivity)
+        integrator.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE)
+        integrator.setPrompt("Scan a QR Code")
+        integrator.setBeepEnabled(false)
+        integrator.setOrientationLocked(true)
+
+        val intent = integrator.createScanIntent()  // <- createScanIntent() returns the configured Intent
+        scanLauncher.launch(intent)
+
+        scanState = ScanResultState(isScanning = true)
     }
 
     Scaffold(
@@ -96,6 +185,7 @@ fun LoginPage(navController: NavController) {
                             horizontal = 0.035 * screenWidth
                         )
                 ) {
+//                    Spacer(modifier = Modifier.size(0.5 * screenHeight))
                     Column(
                         modifier = Modifier
                             .align(Alignment.Center)
@@ -119,7 +209,7 @@ fun LoginPage(navController: NavController) {
                             fontFamily = latoFontFamily,
                         )
                         Text(
-                            text = "AgroSmart",
+                            text = "SmartAgro",
                             color = Primary,
                             fontSize = 40.sp,
                             fontWeight = FontWeight.Bold,
@@ -133,65 +223,49 @@ fun LoginPage(navController: NavController) {
                             fontWeight = FontWeight.Bold,
                             fontFamily = latoFontFamily,
                         )
-                        Spacer(modifier = Modifier.size(0.07 * screenHeight))
-                        OutlinedTextField(
-                            value = mobileNumber,
-                            onValueChange = { newText ->
-                                if (newText.length <= 10 && newText.all { it.isDigit() }) {
-                                    mobileNumber = newText
+                        Spacer(modifier = Modifier.size(0.12 * screenHeight))
+                        if (scanState.isScanning) {
+                            CircularProgressIndicator(modifier = Modifier.size(50.dp))
+                            Spacer(Modifier.height(16.dp))
+                            Text("Camera is active... point it at a QR code.")
+                        } else {
+                            Button(onClick = ::startScan) {
+                                Text("Start QR Code Scan")
+                            }
+                            Spacer(Modifier.height(32.dp))
+
+                            if (scanState.scannedText != null) {
+                                Card(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                                ) {
+                                    Column(Modifier.padding(16.dp)) {
+                                        Text(
+                                            text = "Scan Successful!",
+                                            style = MaterialTheme.typography.titleMedium
+                                        )
+                                        Spacer(Modifier.height(8.dp))
+                                        // Display the fetched text
+                                        Text(
+                                            text = "Fetched Text: ${scanState.scannedText}",
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                        Spacer(Modifier.height(8.dp))
+                                        Text("Text has been stored.")
+                                    }
                                 }
-                            },
-                            placeholder = { Text("Enter Mobile No.", color = Secondary) },
-                            label = { Text("Mobile No.", color = Primary) },
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(size = 16.dp),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = Primary,
-                                unfocusedBorderColor = Primary,
-                                focusedLabelColor = Primary,
-                                cursorColor = Primary,
-                                focusedTextColor = Accent,
-                                unfocusedTextColor = Accent,
-                            ),
-                            // INCREASE FONT SIZE HERE
-                            textStyle = LocalTextStyle.current.copy(
-                                fontSize = 18.sp // Default is usually 16sp, increased by 2
-                            ),
-                            keyboardActions = KeyboardActions(
-                                onDone = {
-                                    focusManager.clearFocus()
-                                }
-                            ),
-                            singleLine = true,
-                            keyboardOptions = KeyboardOptions(
-                                keyboardType = KeyboardType.Number,
-                                imeAction = ImeAction.Done // Ensures the checkmark appears on keyboard
-                            ),
-                        )
-                        Spacer(modifier = Modifier.size(0.02 * screenHeight))
-                        FloatingActionButton(
-                            onClick = {
-                                navController.navigate("splash")
-                            },
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            containerColor = Primary,
-                            elevation = FloatingActionButtonDefaults.elevation(
-                                defaultElevation = 0.dp,
-                                pressedElevation = 0.dp,
-                                focusedElevation = 0.dp,
-                                hoveredElevation = 0.dp
-                            )
-                        ) {
-                            Text(
-                                text = "Get OTP",
-                                fontFamily = latoFontFamily,
-                                color = Color.White,
-                                fontSize = 22.sp,
-                                fontWeight = FontWeight.W500,
-                            )
+                            } else if (!scanState.isScanning) {
+                                // Initial state or scan failed/cancelled
+                                Text(
+                                    text = "Tap the button to scan a node and continue to your account.",
+                                    color = Accent,
+                                    fontFamily = latoFontFamily,
+                                    fontSize = 20.sp,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
                         }
-                        Spacer(modifier = Modifier.size(0.2 * screenHeight))
                     }
                 }
             }

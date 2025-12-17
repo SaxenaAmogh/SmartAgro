@@ -710,7 +710,8 @@ fun SelectCropPage(navController: NavController) {
                                             newFarmType = farmType,
                                             newLatitude = latLng!!.first,
                                             newLongitude = latLng!!.second,
-                                            newLocation = locationText
+                                            newLocation = locationText,
+                                            parent = true
                                         )
                                         navController.navigate("home")
                                     }

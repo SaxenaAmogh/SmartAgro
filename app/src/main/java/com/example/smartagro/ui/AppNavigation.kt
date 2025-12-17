@@ -10,6 +10,7 @@ import com.example.smartagro.ui.screens.CropPage
 import com.example.smartagro.ui.screens.HomePage
 import com.example.smartagro.ui.screens.IrrigationPage
 import com.example.smartagro.ui.screens.LoginPage
+import com.example.smartagro.ui.screens.NodeData
 import com.example.smartagro.ui.screens.PlaceNodePage
 import com.example.smartagro.ui.screens.SelectCropPage
 import com.example.smartagro.ui.screens.SplashScreen
@@ -21,7 +22,7 @@ fun AppNavigation(navController: NavHostController) {
 
     NavHost(
         navController = navController,
-        startDestination = "login"
+        startDestination = "splash"
     ) {
         composable("splash") {
             SplashScreen(navController)
@@ -44,8 +45,11 @@ fun AppNavigation(navController: NavHostController) {
         composable("irrigation") {
             IrrigationPage(navController)
         }
-        composable("place") {
-            PlaceNodePage(navController)
+        composable(route = "place/{nodeId}") { backStackEntry ->
+            PlaceNodePage(navController, backStackEntry.arguments?.getString("nodeId"))
+        }
+        composable(route = "node/{nodeId}") { backStackEntry ->
+            NodeData(navController, backStackEntry.arguments?.getString("nodeId"))
         }
     }
 }
